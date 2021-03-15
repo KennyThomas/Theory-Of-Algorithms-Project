@@ -9,7 +9,61 @@
 union Block{
     BYTE bytes[64];
     WORD words[16];
+    uint64_t sixf[8];
 };
+
+enum Status{
+    READ, PAD, END
+};
+
+int next_block(FILE *f, union Block *B, enum Status *S , uint64_t *nobits){
+    
+    //no. bytes read
+    size_t nobytes;
+
+    if(*S == END){
+        return 0;
+        }
+        else if(*S == READ){
+        //try to read 64 bytes
+        nobytes = fread(B->bytes, 1 , 64 , f);
+        //Update total bits read
+        *nobits = *nobits + (8 * nobytes);
+        if(nobytes == 64){
+            return 1;
+        } else if(nobytes <= 55){
+                B->bytes[nobytes++] = 0x80; // in bits: 10000000
+
+            while(nobytes++ < 56){
+                B->bytes[nobytes] = 0x00; // in bits: 00000000
+            }
+
+            // Append length of original input
+            B->sixf[7] = *nobits;
+            //say this is the last block
+            *S = END;
+        }else{
+            B->bytes[nobytes] = 0x80;
+            while(nobytes++ < 64){
+                B->bytes[nobytes] = 0x00; // in bits: 00000000
+            }
+            //Change status to PAD
+            *S = PAD;
+        }
+
+    }else if (*S == PAD){
+        while(nobytes++ < 56){
+            B->bytes[nobytes] = 0x00; // in bits: 00000000
+        }
+            //Change status to PAD
+        B->sixf[7] = *nobits;
+        *S = PAD;
+    }
+
+    return 1;
+}
+
+
 
 int main(int argsc , char *argv[]){
     int i;
@@ -19,36 +73,19 @@ int main(int argsc , char *argv[]){
     //Total num of bytes read
     uint64_t nobits = 0;
 
-
+    // Curren Status
+    enum Status S = READ;
     //File pointer
     FILE *f;
     //open file from command line
     f = fopen(argv[1], "r");
-    //no. of bytes read
-    size_t nobytes;
 
-    //read bytes
-    nobytes = fread(B.bytes, 1 , 64 , f);
-    printf("Read %d bytes. \n" , nobytes);
-    //update no of bits read
-    nobits = nobits + (8 * nobytes);
-    //print the 16 32-bit words.
-    for(i = 0; i < 16; i++){
-    printf("%08" PF "  " , B.words[i]);
-    if ((i + 1) % 8 == 0)
-    printf("\n");
-    }
-
-    while(!feof(f)){
-        nobytes = fread(B.bytes, 1 , 64 , f);
-        printf("Read %d bytes. \n" , nobytes);
-        nobits = nobits + (8 * nobytes);
-          //print the 16 32-bit words.
+    //Get the next block
+    while(next_block(f, &B, &S, &nobits)){
         for(i = 0; i < 16; i++){
             printf("%08" PF "  " , B.words[i]);
-                if ((i + 1) % 8 == 0)
-                    printf("\n");
         }
+        printf("\n");
     }
 
     //close file
