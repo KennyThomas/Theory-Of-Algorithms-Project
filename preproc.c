@@ -31,10 +31,10 @@ int next_block(FILE *f, union Block *B, enum Status *S , uint64_t *nobits){
         *nobits = *nobits + (8 * nobytes);
         if(nobytes == 64){
             return 1;
-        } else if(nobytes <= 55){
-                B->bytes[nobytes++] = 0x80; // in bits: 10000000
+        } else if(nobytes <= 56){
+            B->bytes[nobytes] = 0x80; // in bits: 10000000
 
-            while(nobytes++ < 56){
+            for(nobytes++; nobytes < 56;nobytes++){
                 B->bytes[nobytes] = 0x00; // in bits: 00000000
             }
 
@@ -44,7 +44,8 @@ int next_block(FILE *f, union Block *B, enum Status *S , uint64_t *nobits){
             *S = END;
         }else{
             B->bytes[nobytes] = 0x80;
-            while(nobytes++ < 64){
+
+            for(nobytes++; nobytes < 64; nobytes++){
                 B->bytes[nobytes] = 0x00; // in bits: 00000000
             }
             //Change status to PAD
@@ -52,12 +53,12 @@ int next_block(FILE *f, union Block *B, enum Status *S , uint64_t *nobits){
         }
 
     }else if (*S == PAD){
-        while(nobytes++ < 56){
+        for (nobytes = 0; nobytes <56; nobytes++){
             B->bytes[nobytes] = 0x00; // in bits: 00000000
         }
-            //Change status to PAD
+        //Change status to END
         B->sixf[7] = *nobits;
-        *S = PAD;
+        *S = END;
     }
 
     return 1;
