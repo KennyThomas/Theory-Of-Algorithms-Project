@@ -2,12 +2,12 @@
 #include <inttypes.h>
 
 #define BYTE uint8_t
-#define WORD uint32_t
-#define PF PRIX32
-#define W 32
+#define WORD uint64_t
+#define PF PRIX64
+#define W 64
 
 union Block{
-    BYTE bytes[64];
+    BYTE bytes[128];
     WORD words[16];
     uint64_t sixf[8];
 };
@@ -29,7 +29,7 @@ int next_block(FILE *f, union Block *B, enum Status *S , uint64_t *nobits){
         nobytes = fread(B->bytes, 1 , 64 , f);
         //Update total bits read
         *nobits = *nobits + (8 * nobytes);
-        if(nobytes == 64){
+        if(nobytes == 128){
             return 1;
         } else if(nobytes <= 56){
             B->bytes[nobytes] = 0x80; // in bits: 10000000
