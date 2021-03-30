@@ -52,12 +52,65 @@ const WORD K[] = {
 0x391c0cb3c5c95a63, 0x4ed8aa4ae3418acb, 0x5b9cca4f7763e373, 0x682e6ff3d6b2b8a3,
 0x748f82ee5defb2fc, 0x78a5636f43172f60, 0x84c87814a1f0ab72, 0x8cc702081a6439ec,
 0x90befffa23631e28, 0xa4506cebde82bde9, 0xbef9a3f7b2c67915, 0xc67178f2e372532b,
-0xca273eceea26619c, 0xd186b8c721c0c207 0xeada7dd6cde0eb1e, 0xf57d4f7fee6ed178,
+0xca273eceea26619c, 0xd186b8c721c0c207, 0xeada7dd6cde0eb1e, 0xf57d4f7fee6ed178,
 0x06f067aa72176fba, 0x0a637dc5a2c898a6, 0x113f9804bef90dae, 0x1b710b35131c471b,
 0x28db77f523047d84, 0x32caab7b40c72493, 0x3c9ebe0a15c9bebc, 0x431d67c49c100d4c,
 0x4cc5d4becb3e42b6, 0x597f299cfc657e2a, 0x5fcb6fab3ad6faec, 0x6c44198c4a475817
 };
 
+
+int next_block(FILE *f, union Block *M, enum Status *S , uint64_t *nobits){
+    
+    //no. bytes read
+    size_t nobytes;
+
+    if(*S == END){
+        return 0;
+        }
+        else if(*S == READ){
+        //try to read 128 bytes
+        nobytes = fread(M->bytes, 1 , 128 , f);
+        //Update total bits read
+        *nobits = *nobits + (16 * nobytes);
+
+        if(nobytes == 128){      
+        } else if(nobytes < 112){
+            M->bytes[nobytes] = 0x80; // in bits: 10000000
+
+            for(nobytes++; nobytes < 112;nobytes++){
+                M->bytes[nobytes] = 0x00; // in bits: 00000000
+            }
+
+            // Append length of original input
+            M->sixf[15] = (is_lilendian() ? bswap_64(*nobits)  : *nobits);
+            //say this is the last block
+            *S = END;
+        }else{
+            M->bytes[nobytes] = 0x80;
+
+            for(nobytes++; nobytes < 128; nobytes++){
+                M->bytes[nobytes] = 0x00; // in bits: 00000000
+            }
+            //Change status to PAD
+            *S = PAD;
+        }
+
+    }else if (*S == PAD){
+        for (nobytes = 0; nobytes <112; nobytes++){
+            M->bytes[nobytes] = 0x00; // in bits: 00000000
+        }
+        //Change status to END
+         M->sixf[15] = (is_lilendian() ? bswap_64(*nobits) : *nobits);
+        *S = END;
+    }
+
+    if(is_lilendian())
+        for(int i = 0; i < 32; i++)
+            M->words[i] = bswap_32(M->words[i]);
+
+
+    return 1;
+}
 
 
 
