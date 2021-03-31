@@ -26,8 +26,8 @@ const int _i = 1;
 
 union Block{
     BYTE bytes[128];
-    WORD words[16];
-    uint64_t sixf[8];
+    WORD words[64];
+    uint64_t sixf[16];
 };
 
 enum Status{
@@ -71,7 +71,7 @@ int next_block(FILE *f, union Block *M, enum Status *S , uint64_t *nobits){
         //try to read 128 bytes
         nobytes = fread(M->bytes, 1 , 128 , f);
         //Update total bits read
-        *nobits = *nobits + (16 * nobytes);
+        *nobits = *nobits + (8 * nobytes);
 
         if(nobytes == 128){      
         } else if(nobytes < 112){
@@ -112,18 +112,75 @@ int next_block(FILE *f, union Block *M, enum Status *S , uint64_t *nobits){
     return 1;
 }
 
+int next_hash(union Block *M , WORD H[]){
+   
+    WORD W[128];
+    int t;
+
+    WORD a, b, c, d, e, f, g, h , T1 , T2;
+    
+   //Section 6.4.2 part 1
+    for(t = 0; t < 16; t++)
+        W[t] = M->words[t];
+    for (t = 16; t < 80; t++ )
+        W[t] = Sig1(W[t-2]) + W[t-7] + Sig0(W[t-15]) + W[t-16];
 
 
 
+    //Section 6.4.2 part 2
 
+    a = H[0]; b = H[1]; c = H[2]; d = H[3]; 
+    e = H[4]; f = H[5]; g = H[6]; h = H[7];
 
+    //Section 6.4.2 part 3
+    for(t=0; t < 80; t++){
+        T1 = h + SIG1(e) + CH(e,f,g) + K[t] + W[t];
+        T2 = SIG0(a) + MAJ(a,b,c);
+        h = g; g = f; f = e; e = d + T1; d = c; c = b; b = a; a = T1 + T2;
+    }
+
+    //Section 6.4.2 part 4
+
+    H[0] = a + H[0]; H[1] = b + H[1]; H[2] = c + H[2]; H[3] = d + H[3]; 
+    H[4] = e + H[4]; H[5] = f + H[5]; H[6] = g + H[6]; H[7] = h + H[7];
+    return 0;
+}
+
+int sha512(FILE *f, WORD H[]){
+
+    union Block M;
+
+    //Total num of bytes read
+    uint64_t nobits = 0;
+
+    // Curren Status
+    enum Status S = READ;
+
+    while(next_block(f, &M, &S, &nobits)){
+        next_hash(&M,H);
+    }
+    printf("Total bits read: %d.\n" , nobits);
+    return 0;
+}
 
 int main(int argsc , char *argv[]){
     //5.3.4
     WORD H[]={  0x6a09e667f3bcc908 , 0xbb67ae8584caa73b , 0x3c6ef372fe94f82b , 0xa54ff53a5f1d36f1, 
                 0x510e527fade682d1, 0x9b05688c2b3e6c1f , 0x1f83d9abfb41bd6b, 0x5be0cd19137e2179
         };
-    
+    //File pointer
+    FILE *f;
+    //open file from command line
+    f = fopen(argv[1], "r");
+
+    sha512(f, H);
+    //print hash
+    for (int i = 0; i < 8; i++){
+        printf("%016" PF, H[i]);
+    }
+    printf("\n");
+    //close file
+    fclose(f);
 
     return 0;
 }

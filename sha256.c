@@ -104,8 +104,8 @@ int next_block(FILE *f, union Block *M, enum Status *S , uint64_t *nobits){
     }
 
     if(is_lilendian())
-        for(int i = 0; i < 16; i++)
-            M->words[i] = bswap_32(M->words[i]);
+        for(int i = 0; i < 32; i++)
+            M->words[i] = bswap_64(M->words[i]);
 
 
     return 1;
