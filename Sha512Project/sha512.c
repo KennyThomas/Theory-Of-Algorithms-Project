@@ -26,7 +26,7 @@ const int _i = 1;
 
 union Block{
     BYTE bytes[128];
-    WORD words[64];
+    WORD words[16];
     uint64_t sixf[16];
 };
 
@@ -35,7 +35,6 @@ enum Status{
 };
 
 const WORD K[] = {
-
 0x428a2f98d728ae22, 0x7137449123ef65cd, 0xb5c0fbcfec4d3b2f, 0xe9b5dba58189dbbc,
 0x3956c25bf348b538, 0x59f111f1b605d019, 0x923f82a4af194f9b, 0xab1c5ed5da6d8118,
 0xd807aa98a3030242, 0x12835b0145706fbe, 0x243185be4ee4b28c, 0x550c7dc3d5ffb4e2,
@@ -59,6 +58,7 @@ const WORD K[] = {
 };
 
 
+
 int next_block(FILE *f, union Block *M, enum Status *S , uint64_t *nobits){
     
     //no. bytes read
@@ -68,12 +68,15 @@ int next_block(FILE *f, union Block *M, enum Status *S , uint64_t *nobits){
         return 0;
         }
         else if(*S == READ){
-        //try to read 128 bytes
+        //try to read 64 bytes
         nobytes = fread(M->bytes, 1 , 128 , f);
         //Update total bits read
         *nobits = *nobits + (8 * nobytes);
+        
 
         if(nobytes == 128){      
+            
+            return 1;
         } else if(nobytes < 112){
             M->bytes[nobytes] = 0x80; // in bits: 10000000
 
@@ -105,15 +108,16 @@ int next_block(FILE *f, union Block *M, enum Status *S , uint64_t *nobits){
     }
 
     if(is_lilendian())
-        for(int i = 0; i < 32; i++)
-            M->words[i] = bswap_32(M->words[i]);
+        for(int i = 0; i < 16; i++)
+            M->words[i] = bswap_64(M->words[i]);
 
 
     return 1;
 }
 
+
 int next_hash(union Block *M , WORD H[]){
-   
+  
     WORD W[128];
     int t;
 
@@ -129,20 +133,38 @@ int next_hash(union Block *M , WORD H[]){
 
     //Section 6.4.2 part 2
 
-    a = H[0]; b = H[1]; c = H[2]; d = H[3]; 
-    e = H[4]; f = H[5]; g = H[6]; h = H[7];
+    a = H[0]; 
+    b = H[1]; 
+    c = H[2]; 
+    d = H[3]; 
+    e = H[4]; 
+    f = H[5]; 
+    g = H[6]; 
+    h = H[7];
 
     //Section 6.4.2 part 3
     for(t=0; t < 80; t++){
         T1 = h + SIG1(e) + CH(e,f,g) + K[t] + W[t];
         T2 = SIG0(a) + MAJ(a,b,c);
-        h = g; g = f; f = e; e = d + T1; d = c; c = b; b = a; a = T1 + T2;
+        h = g; 
+        g = f; 
+        f = e; 
+        e = d + T1; 
+        d = c; c = b; 
+        b = a; 
+        a = T1 + T2;
     }
 
     //Section 6.4.2 part 4
 
-    H[0] = a + H[0]; H[1] = b + H[1]; H[2] = c + H[2]; H[3] = d + H[3]; 
-    H[4] = e + H[4]; H[5] = f + H[5]; H[6] = g + H[6]; H[7] = h + H[7];
+    H[0] = a + H[0]; 
+    H[1] = b + H[1]; 
+    H[2] = c + H[2]; 
+    H[3] = d + H[3]; 
+    H[4] = e + H[4]; 
+    H[5] = f + H[5]; 
+    H[6] = g + H[6]; 
+    H[7] = h + H[7];
     return 0;
 }
 
@@ -159,7 +181,6 @@ int sha512(FILE *f, WORD H[]){
     while(next_block(f, &M, &S, &nobits)){
         next_hash(&M,H);
     }
-    printf("Total bits read: %d.\n" , nobits);
     return 0;
 }
 
