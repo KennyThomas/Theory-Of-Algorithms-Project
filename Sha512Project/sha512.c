@@ -68,7 +68,7 @@ int next_block(FILE *f, union Block *M, enum Status *S , uint64_t *nobits){
         return 0;
         }
         else if(*S == READ){
-        //try to read 64 bytes
+        //try to read 128 bytes
         nobytes = fread(M->bytes, 1 , 128 , f);
         //Update total bits read
         *nobits = *nobits + (8 * nobytes);
@@ -80,7 +80,7 @@ int next_block(FILE *f, union Block *M, enum Status *S , uint64_t *nobits){
         } else if(nobytes < 112){
             M->bytes[nobytes] = 0x80; // in bits: 10000000
 
-            for(nobytes++; nobytes < 112;nobytes++){
+            for(nobytes++; nobytes < 128;nobytes++){
                 M->bytes[nobytes] = 0x00; // in bits: 00000000
             }
 
