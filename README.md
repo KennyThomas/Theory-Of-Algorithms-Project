@@ -4,6 +4,23 @@
 
 
 ## Compilation 
+* Clone repository
+* Open project in Debian or Ubuntu
+### Run main code
+* Run command "make Sha5122
+* This will run the code and display the output.
+* You can change the the message is by editing input.txt.
+
+### Run tests
+* Run command "make test"
+* This will display if the tests passed or not
+* If all tests pass a message will display
+
+### To run main code again
+* Run command "make clean"
+* This will remove the executable file
+* Run command "make Sha512"
+
 
 
 ## Explanation
