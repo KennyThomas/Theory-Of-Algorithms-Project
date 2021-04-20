@@ -143,6 +143,10 @@ SHA512 uses 1024 bit blocks. Each block uses the result of the previous block to
 <b>Can you design an algorithm that, given enough time,will find input messages that give each of the possible 512-bit strings?</b>
 
 
+
 ### Q3
 
 <b>How difficult is it to find a hash digest beginning with at least twelve zeros?</b>
+
+
+
