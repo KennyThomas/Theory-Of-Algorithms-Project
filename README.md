@@ -142,7 +142,8 @@ SHA512 uses 1024 bit blocks. Each block uses the result of the previous block to
 
 <b>Can you design an algorithm that, given enough time,will find input messages that give each of the possible 512-bit strings?</b>
 
-
+The SHA-512 produces 512 bits so there would be 2⁵¹² possible outputs which works out to be 1.340780793e+154 combinations. Doing research into how a hash algorithm could be broken I found the Pigeonhole Principle and the Birthday Paradox to be promising. The Birthday Paradox states that if 366 people attend a birthday there would be a 100% chance there would be a shared birthday as there are only 366 days in a year containing February 29th which is a leap year. So if we applied this paradox to the SHA-512 algorithm it would be possible to design an algorithm that will find each of the possible 512- bit strings. This is also known as a Birthday attack.
+The Pigeonhole Principle states that if 20 pigeons are put into 19 boxes, one of these boxes will contain two. Bringing this into the SHA512 if we compute more combinations we would find each of the possible 512-bit strings. 
 
 ### Q3
 
