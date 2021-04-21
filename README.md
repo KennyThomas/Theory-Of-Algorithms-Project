@@ -147,7 +147,28 @@ The Pigeonhole Principle states that if 20 pigeons are put into 19 boxes, one of
 
 ### Q3
 
-<b>How difficult is it to find a hash digest beginning with at least twelve zeros?</b>
+<b>How difficult is it to find a hash digest beginning with at least twelve zeros?</b> <br>
+Finding a hash digest beginning with at least twelve zeros is a process that would require a great length of time. However, to find just how hard it would be we can use a formula. This formula was found on Stack Exchange, the link to the page will be in the references section. <br>
+* Firstly we get our target which is 000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff. 
+* Since we are using the SHA-512 our target is 128 characters long.
+* Next we divide our target by the maximum value of a 512 bit number. Max number is ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+* TargetValue/MaxValue = 3.552713679e-15
+* 1/3.552713679e-15 = 2.814749767e14 -- To get the average
+* From this website it says the average hash rate of a laptop is 100k Hash/sec
+* So we divide our average by 100k 
+* Our answer is 2814749767 seconds
+* To grasp the lenth that is, this is 4654 weeks 2 hr. 56 min. 7 sec.
+
+Finding this hash would be extremely difficult and time consuming.
 
 
+## References
+* GMIT Lecture videos
+* https://bitcoin.stackexchange.com/questions/81655/creating-a-hash-that-starts-wtih-9-zeros  
+* https://en.wikipedia.org/wiki/Birthday_attack 
+* https://en.wikipedia.org/wiki/Collision_resistance 
+* https://en.wikipedia.org/wiki/Pigeonhole_principle 
+* https://medium.com/@zaid960928/cryptography-explaining-sha-512-ad896365a0c1
+* https://www.python.org/
+* https://devhints.io/bash
 
