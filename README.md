@@ -5,7 +5,7 @@ This repository contains the code to compute the SHA512 alogorithm on a txt file
 The code can be found in the file called sha512.c<br>
 The two txt files used are located in the repository. <br>
 There is also a Make file that is used to use command line arguements such as
-* "make sha512" - This runs the algorithm on the txt file input.txt
+* "make" - This runs the algorithm on the txt file input.txt
 * "make test" - This runs tests to see if the algorithm is producding the right hash.
 * "make clean" - This removes the executable file sha512, this is done so the user can rerun the project
 
@@ -14,7 +14,7 @@ There is also a Make file that is used to use command line arguements such as
 * Clone repository
 * Open project in Debian or Ubuntu
 #### Run main code
-* Run command "make Sha5122
+* Run command "make"
 * This will run the code and display the output.
 * You can change the the message is by editing input.txt.
 
